@@ -79,7 +79,7 @@ data[c('MinRevenue', 'MaxRevenue')] <- str_split_fixed(data$Revenue, 'to', 2)
 # Check and replace only in MinRevenue for billion/million 
 vec3 <- c(" billion" = "000000000"," million" = "000000")
 data$MinRevenue <- as.numeric(str_replace_all(data$MinRevenue, vec3))
-# Check MaxRevenue for million/billion and MinRevenue < 1000 and then replace
+# Check MaxRevenue for million/billion and update MinRevenue accordingly
 data <- data %>% 
    mutate(MinRevenue = ifelse(grepl('million', data$MaxRevenue), MinRevenue*1000000, MinRevenue))
 data <- data %>% 
