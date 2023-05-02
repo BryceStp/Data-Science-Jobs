@@ -1,0 +1,14 @@
+```{r setup}
+# Install packages and read in data
+#install.packages("shiny")
+library(tidyverse)
+library(ggplot2)
+library(shiny)
+data <- read.csv("Cleaned_Data.csv")
+
+# Prevents Scientific Notation 
+options(scipen = 100)
+
+view(data)
+```
+
