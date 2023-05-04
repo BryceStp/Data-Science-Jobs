@@ -145,8 +145,6 @@ sum(is.na(data))
 # Function to replace all numeric na values with the median
 for(i in which(sapply(data, is.numeric))){
   data[is.na(data[,i]),i] <- median(data[,i], na.rm = TRUE)}
-# Convert remaining Categorical NA values to Not Provided 
-data[is.na(data) == TRUE] <- "Not Provided"
 
 view(data)
 ```
