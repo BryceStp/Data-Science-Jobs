@@ -61,7 +61,6 @@ ui <- navbarPage(theme = shinytheme("cyborg"),
            mainPanel(DT::DTOutput("datatable"))),
   # Data tabPanel
   tabPanel("Rating",
-           fluidPage(
              sidebarPanel(
                sliderInput(
                  inputId = "bins",
@@ -72,7 +71,6 @@ ui <- navbarPage(theme = shinytheme("cyborg"),
                ),
              ), # sidebarPanel
              mainPanel(plotOutput(outputId = "distPlot")) # mainPanel
-           ) # fluidPage 
            ) # tabPanel
   ) # navbarPage
 # Server Function
