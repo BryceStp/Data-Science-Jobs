@@ -16,56 +16,83 @@ JobCleanedData <- read.csv("Cleaned_Data.csv")
 ```
 
 ```{r}
-
-ui <- fluidPage(theme = shinytheme("cyborg"),
-      navbarPage(
-        "Data Science Jobs in the United States",
-          tabPanel("Data",
+# ui setup
+ui <- navbarPage(theme = shinytheme("cyborg"),
+  "Data Science Jobs in the United States",
+  tabPanel("Raw Data",
+           sidebarPanel(
+             div(
+               id = "form",
+               pickerInput(
+                 'industry',
+                 "Select Industry:",
+                 choices = unique(JobCleanedData$Industry),
+                 options = list(`actions-box` = TRUE),
+                 multiple =
+                   T,
+                 selected = JobCleanedData$Industry
+               ),
+               pickerInput(
+                 'city',
+                 "Select City:",
+                 choices = unique(JobCleanedData$City),
+                 options = list(`actions-box` = TRUE),
+                 multiple = T,
+                 selected = JobCleanedData$City
+               ),
+               pickerInput(
+                 'state',
+                 'Choose State:',
+                 choices = unique(JobCleanedData$State),
+                 options = list(`actions-box` = TRUE),
+                 multiple = T,
+                 selected = JobCleanedData$State
+               ),
+               pickerInput(
+                 'size',
+                 "Choose Size:",
+                 choices = unique(JobCleanedData$Size),
+                 options = list(`actions-box` = TRUE),
+                 multiple = T,
+                 selected = JobCleanedData$Size
+               )
+             ) # div
+           ), # sidebarPanel
+           mainPanel(DT::DTOutput("datatable"))),
+  # Data tabPanel
+  tabPanel("Rating",
            fluidPage(
              sidebarPanel(
-               div(id = "form",
-                   pickerInput('industry', "Select Industry:", choices = unique(JobCleanedData$Industry), options = list(`actions-box` = TRUE), multiple = 
-                                 T,selected =JobCleanedData$Industry),
-                   pickerInput('city', "Select City:", choices = unique(JobCleanedData$City), options = list(`actions-box` = TRUE), multiple = T,
-                               selected =JobCleanedData$City),
-                   pickerInput('state', 'Choose State:', choices = unique(JobCleanedData$State), options = list(`actions-box` = TRUE), multiple = T,
-                               selected =JobCleanedData$State),
-                   pickerInput('size', "Choose Size:", choices = unique(JobCleanedData$Size), options = list(`actions-box` = TRUE), multiple = T,
-                               selected =JobCleanedData$Size)
-                ) # div
-              ), # sidebarPanel
-               mainPanel(
-                 DT::DTOutput("datatable")))
-          ), # Data tabPanel
-          tabPanel("Rating",
-                   sidebarPanel(
-                      sliderInput(inputId = "bins",
-                                  label = "Number of bins:",
-                                  min = 0,
-                                  max = 30,
-                                  value = 15),
-            ), # sidebarPanel
-            mainPanel(
-              plotOutput(outputId = "distPlot")
-            ) # mainPanel
-          ), # Rating tabPanel
-        tabPanel("Navbar 3", "This panel is intentionally left blank"),
-      ) # navbarPage
-  ) # fluidPage
-
-
-server <- function(session, input, output){
+               sliderInput(
+                 inputId = "bins",
+                 label = "Number of bins:",
+                 min = 0,
+                 max = 30,
+                 value = 15
+               ),
+             ), # sidebarPanel
+             mainPanel(plotOutput(outputId = "distPlot")) # mainPanel
+           ) # fluidPage 
+           ) # tabPanel
+  ) # navbarPage
+# Server Function
+server <- function(session, input, output) {
   output$distPlot <- renderPlot({
     x    <- JobCleanedData$Rating
     bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    hist(x, breaks = bins, col = "#75AADB", border = "black",
-         xlab = "Rating",
-         main = "Quality of Data Science Jobs")
+    hist(
+      x,
+      breaks = bins,
+      col = "#75AADB",
+      border = "black",
+      xlab = "Rating",
+      main = "Quality of Data Science Jobs"
+    )
   }) #distPlot
-filter_by_Industry <- reactive({
-    filter(JobCleanedData[c(2:4,7:16)], Industry %in% input$industry)
+  filter_by_Industry <- reactive({
+    filter(JobCleanedData[c(2:4, 7:16)], Industry %in% input$industry)
   }) # filter_by_Industry
-
+  
   filter_by_all <- reactive({
     fd <- filter_by_Industry()
     
@@ -79,20 +106,44 @@ filter_by_Industry <- reactive({
     
     if (!is.null(input$size)) {
       fd <- filter(fd, Size %in% input$size)
-    }         
+    }
     return(fd)
   }) # filter_by_all
   observe({
-    updatePickerInput(session, 'Industry', "Select Industry:", choices = unique(filter_by_all()$Industry), selected = input$industry)
-    updatePickerInput(session, 'City', "Select City:", choices = unique(filter_by_all()$City), selected = input$city)
-    updatePickerInput(session, 'State', 'Choose State:', choices = unique(filter_by_all()$State), selected = input$state)
-    updatePickerInput(session, 'Size', "Choose Size:", choices = unique(filter_by_all()$Size), selected = input$size)
+    updatePickerInput(
+      session,
+      'Industry',
+      "Select Industry:",
+      choices = unique(filter_by_all()$Industry),
+      selected = input$industry
+    )
+    updatePickerInput(
+      session,
+      'City',
+      "Select City:",
+      choices = unique(filter_by_all()$City),
+      selected = input$city
+    )
+    updatePickerInput(
+      session,
+      'State',
+      'Choose State:',
+      choices = unique(filter_by_all()$State),
+      selected = input$state
+    )
+    updatePickerInput(
+      session,
+      'Size',
+      "Choose Size:",
+      choices = unique(filter_by_all()$Size),
+      selected = input$size
+    )
   }) #observe
   
   output$datatable <- DT::renderDT({
     filter_by_all()
   }) # datatable
-
+  
 }
 
 shinyApp(ui = ui, server = server)
